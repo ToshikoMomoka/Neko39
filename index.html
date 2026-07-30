@@ -546,12 +546,55 @@
 
 
 
-  <!--
-    - custom js link
-  -->
+  <!-- custom js link -->
   <script src="./assets/js/script.js"></script>
 
-  <script>
+  <!-- Firebase & Contact Form Script -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-analytics.js";
+    import { 
+      getFirestore, 
+      doc, 
+      getDoc, 
+      setDoc, 
+      addDoc, 
+      collection, 
+      serverTimestamp 
+    } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-firestore.js";
+
+    // Web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyD61Qga8CqGPk7wcmHhhzUwefqm1N1dmVo",
+      authDomain: "neko39-8ce8f.firebaseapp.com",
+      projectId: "neko39-8ce8f",
+      storageBucket: "neko39-8ce8f.firebasestorage.app",
+      messagingSenderId: "880911361022",
+      appId: "1:880911361022:web:4285b44d5e31bc0def56af",
+      measurementId: "G-85Q6FKZ73G"
+    };
+
+    // Initialize Firebase Services
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const db = getFirestore(app);
+
+    const configDocRef = doc(db, 'config', 'discord');
+
+    // Dynamically fetch webhook URL string from Firebase Firestore
+    async function fetchWebhookUrlFromFirebase() {
+      try {
+        const docSnap = await getDoc(configDocRef);
+        if (docSnap.exists() && docSnap.data()?.webhookUrl) {
+          return docSnap.data().webhookUrl;
+        }
+      } catch (err) {
+        console.error("Firebase: Error reading config from Firestore:", err);
+      }
+      throw new Error("Webhook URL could not be loaded from Firebase.");
+    }
+
+    // Attach submit listener to contact form
     document.addEventListener('DOMContentLoaded', () => {
       const contactForm = document.querySelector('#discord-contact-form');
       if (contactForm) {
@@ -567,12 +610,6 @@
 
           btnSpan.textContent = 'Sending...';
           submitBtn.disabled = true;
-
-          const webhookUrl = 'https://discord.com/api/webhooks/1532343806144417832/07MHSPPQJS5eB6X6JpeyCzLSjonlqSdthR9lx4Gl91MEZBWV__gg8LFrnBuFLVVINWGH';
-
-          const payload = {
-            content: `📩 **New Contact Form Submission!**\n**Name:** ${fullname}\n**Email:** ${email}\n**Message:**\n${message}`
-          };
 
           const showToast = (msg, success) => {
             const toastEl = document.getElementById('customToast');
@@ -592,6 +629,27 @@
           };
 
           try {
+            // Fetch the webhook URL string stored in Firebase Firestore
+            const webhookUrl = await fetchWebhookUrlFromFirebase();
+
+            // Save message submission to Firebase Firestore collection 'messages'
+            try {
+              await addDoc(collection(db, 'messages'), {
+                fullname,
+                email,
+                message,
+                timestamp: serverTimestamp()
+              });
+              console.log("Firebase: Message logged to Firestore 'messages' collection.");
+            } catch (dbErr) {
+              console.warn("Firebase: Note - Message failed to log to Firestore:", dbErr);
+            }
+
+            // Post message payload to the Discord Webhook
+            const payload = {
+              content: `📩 **New Contact Form Submission!**\n**Name:** ${fullname}\n**Email:** ${email}\n**Message:**\n${message}`
+            };
+
             const res = await fetch(webhookUrl, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },

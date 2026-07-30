@@ -1,0 +1,19 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Allow public read access to config (to fetch Webhook URL), but block public write/tampering
+    match /config/{document=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Allow public creation of contact form messages, but prevent public reading or deleting
+    match /messages/{messageId} {
+      allow create: if true;
+      allow read, update, delete: if false;
+    }
+
+  }
+}
