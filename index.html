@@ -39,6 +39,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
 </head>
 
 <body>
@@ -234,6 +235,10 @@
 
           <p>
             Now then, shall we begin the next performance?
+          </p>
+
+          <p style="font-size: 0.65rem; opacity: 0.5; margin-top: 10px;">
+            I love TM Opera O~
           </p>
         </section>
 
@@ -514,6 +519,28 @@
 
   </main>
 
+  <!-- Custom Toast -->
+  <div id="customToast" style="
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 9999;
+    min-width: 280px;
+    max-width: 400px;
+    padding: 16px 20px;
+    border-radius: 12px;
+    color: #fff;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.9rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    transform: translateY(120%);
+    opacity: 0;
+    transition: transform 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.4s ease;
+    pointer-events: none;
+  ">
+    <span id="toastMessage"></span>
+  </div>
+
 
 
 
@@ -547,6 +574,23 @@
             content: `📩 **New Contact Form Submission!**\n**Name:** ${fullname}\n**Email:** ${email}\n**Message:**\n${message}`
           };
 
+          const showToast = (msg, success) => {
+            const toastEl = document.getElementById('customToast');
+            const toastMsg = document.getElementById('toastMessage');
+            toastMsg.textContent = msg;
+            toastEl.style.background = success
+              ? 'linear-gradient(135deg, #28a745, #218838)'
+              : 'linear-gradient(135deg, #dc3545, #c82333)';
+            toastEl.style.transform = 'translateY(0)';
+            toastEl.style.opacity = '1';
+            toastEl.style.pointerEvents = 'auto';
+            setTimeout(() => {
+              toastEl.style.transform = 'translateY(120%)';
+              toastEl.style.opacity = '0';
+              toastEl.style.pointerEvents = 'none';
+            }, 4000);
+          };
+
           try {
             const res = await fetch(webhookUrl, {
               method: 'POST',
@@ -555,14 +599,14 @@
             });
 
             if (res.ok || res.status === 204) {
-              alert('Message sent successfully!');
+              showToast('Message sent successfully!', true);
               contactForm.reset();
             } else {
-              alert('Failed to send message via Discord webhook.');
+              showToast('Failed to send message. Please try again.', false);
             }
           } catch (err) {
             console.error(err);
-            alert('An error occurred while sending message.');
+            showToast('An error occurred while sending message.', false);
           } finally {
             btnSpan.textContent = originalText;
             submitBtn.disabled = false;
@@ -577,6 +621,7 @@
   -->
   <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
   <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+
 
 </body>
 
