@@ -175,3 +175,154 @@ for (let i = 0; i < navigationLinks.length; i++) {
 
   });
 }
+
+
+// Last.fm Dynamic Songs Fetch
+const LASTFM_API_KEY = "f1e78aa744475ddc5a0a5958e303f2d2";
+const LASTFM_USERNAME = "Neko39_";
+
+async function fetchLastfmTopTracks() {
+  const songsListContainer = document.getElementById("songs-list");
+  if (!songsListContainer) return;
+
+  const url = `https://ws.audioscrobbler.com/2.0/?method=user.gettoptracks&user=${LASTFM_USERNAME}&api_key=${LASTFM_API_KEY}&limit=10&format=json&period=overall`;
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Last.fm API error: ${response.status}`);
+    }
+    const data = await response.json();
+    const tracks = data.toptracks?.track;
+
+    if (!tracks || tracks.length === 0) {
+      throw new Error("No tracks found or invalid response structure");
+    }
+
+    renderSongs(tracks, songsListContainer);
+  } catch (error) {
+    console.error("Error fetching Last.fm top tracks:", error);
+    renderFallbackSongs(songsListContainer);
+  }
+}
+
+/**
+ * Fetch album artwork from the iTunes Search API.
+ * Returns a 300x300 image URL, or null if nothing was found.
+ */
+async function fetchItunesArt(trackName, artistName) {
+  try {
+    const query = encodeURIComponent(`${trackName} ${artistName}`);
+    const res = await fetch(
+      `https://itunes.apple.com/search?term=${query}&entity=song&limit=1&media=music`
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (data.results && data.results.length > 0) {
+      // Replace the 100x100 thumbnail with a 300x300 version
+      return data.results[0].artworkUrl100.replace("100x100bb", "300x300bb");
+    }
+  } catch (e) {
+    // Silently ignore – placeholder will stay
+  }
+  return null;
+}
+
+function renderSongs(tracks, container) {
+  container.innerHTML = ""; // Clear skeletons
+
+  // Build all cards first (fast, no waiting)
+  const imgElements = [];
+  tracks.forEach((track) => {
+    const songItem = document.createElement("li");
+    songItem.className = "song-item";
+    songItem.innerHTML = `
+      <a href="${track.url}" target="_blank" rel="noopener noreferrer" class="song-item-link">
+        <img src="" alt="${track.name}" class="song-img art-loading">
+        <div class="song-info">
+          <h4 class="song-title">${track.name}</h4>
+          <p class="song-artist">${track.artist?.name || "Unknown Artist"}</p>
+        </div>
+        <div class="sound-wave">
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+        </div>
+      </a>
+    `;
+    container.appendChild(songItem);
+    imgElements.push(songItem.querySelector("img.song-img"));
+  });
+
+  // Now fetch all artwork in parallel and swap images as they arrive
+  tracks.forEach((track, i) => {
+    fetchItunesArt(track.name, track.artist?.name || "").then((artUrl) => {
+      const imgEl = imgElements[i];
+      if (!imgEl) return;
+      const finalSrc = artUrl || "./img/icon-design.svg";
+      imgEl.onload = () => imgEl.classList.remove("art-loading");
+      imgEl.onerror = () => {
+        imgEl.src = "./img/icon-design.svg";
+        imgEl.classList.remove("art-loading");
+      };
+      imgEl.src = finalSrc;
+    });
+  });
+}
+
+function renderFallbackSongs(container) {
+  const fallbacks = [
+    { name: "Shape of You", artist: "Ed Sheeran", url: "https://www.last.fm/music/Ed+Sheeran/_/Shape+of+You" },
+    { name: "Blinding Lights", artist: "The Weeknd", url: "https://www.last.fm/music/The+Weeknd/_/Blinding+Lights" },
+    { name: "Stay", artist: "The Kid LAROI & Justin Bieber", url: "https://www.last.fm/music/The+Kid+LAROI+&+Justin+Bieber/_/Stay" },
+    { name: "Starboy", artist: "The Weeknd", url: "https://www.last.fm/music/The+Weeknd/_/Starboy" },
+    { name: "Sweater Weather", artist: "The Neighbourhood", url: "https://www.last.fm/music/The+Neighbourhood/_/Sweater+Weather" },
+    { name: "Believer", artist: "Imagine Dragons", url: "https://www.last.fm/music/Imagine+Dragons/_/Believer" },
+    { name: "Perfect", artist: "Ed Sheeran", url: "https://www.last.fm/music/Ed+Sheeran/_/Perfect" },
+    { name: "As It Was", artist: "Harry Styles", url: "https://www.last.fm/music/Harry+Styles/_/As+It+Was" },
+    { name: "Lovely", artist: "Billie Eilish & Khalid", url: "https://www.last.fm/music/Billie+Eilish+&+Khalid/_/Lovely" },
+    { name: "Another Love", artist: "Tom Odell", url: "https://www.last.fm/music/Tom+Odell/_/Another+Love" }
+  ];
+
+  container.innerHTML = "";
+  const imgElements = [];
+  fallbacks.forEach((track) => {
+    const songItem = document.createElement("li");
+    songItem.className = "song-item";
+    songItem.innerHTML = `
+      <a href="${track.url}" target="_blank" rel="noopener noreferrer" class="song-item-link">
+        <img src="" alt="${track.name}" class="song-img art-loading">
+        <div class="song-info">
+          <h4 class="song-title">${track.name}</h4>
+          <p class="song-artist">${track.artist}</p>
+        </div>
+        <div class="sound-wave">
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+        </div>
+      </a>
+    `;
+    container.appendChild(songItem);
+    imgElements.push(songItem.querySelector("img.song-img"));
+  });
+
+  fallbacks.forEach((track, i) => {
+    fetchItunesArt(track.name, track.artist).then((artUrl) => {
+      const imgEl = imgElements[i];
+      if (!imgEl) return;
+      const finalSrc = artUrl || "./img/icon-design.svg";
+      imgEl.onload = () => imgEl.classList.remove("art-loading");
+      imgEl.onerror = () => {
+        imgEl.src = "./img/icon-design.svg";
+        imgEl.classList.remove("art-loading");
+      };
+      imgEl.src = finalSrc;
+    });
+  });
+}
+
+// Execute on load
+fetchLastfmTopTracks();

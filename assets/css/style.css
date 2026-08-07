@@ -1884,6 +1884,407 @@ textarea.form-input::-webkit-resizer { display: none; }
 
 
 /*-----------------------------------*\
+  #MORE ABOUT ME
+\*-----------------------------------*/
+
+.more-about-me .section-title {
+  margin-bottom: 10px;
+  font-size: var(--fs-2);
+}
+
+.more-about-me .section-subtitle {
+  color: var(--light-gray-70);
+  font-size: var(--fs-6);
+  font-weight: var(--fw-300);
+  margin-bottom: 25px;
+}
+
+.songs-section,
+.games-section,
+.languages-section {
+  margin-bottom: 35px;
+}
+
+/**
+ * #spotify songs 
+ */
+
+.songs-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+.song-item {
+  position: relative;
+  background: var(--border-gradient-onyx);
+  padding: 15px 20px;
+  border-radius: 14px;
+  box-shadow: var(--shadow-2);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  transition: transform var(--transition-1), box-shadow var(--transition-1);
+}
+
+.song-item::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  background: var(--bg-gradient-jet);
+  border-radius: inherit;
+  z-index: -1;
+}
+
+.song-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+.song-item-link {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+  color: inherit;
+}
+
+.song-img {
+  width: 55px;
+  height: 55px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+  opacity: 1;
+  transition: opacity 0.4s ease;
+  background: var(--jet);
+}
+
+/* While artwork is still loading, keep the shimmer background visible */
+.song-img.art-loading {
+  opacity: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.song-img.art-loading::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0) 0%,
+    rgba(255,255,255,0.06) 40%,
+    rgba(255,255,255,0.12) 60%,
+    rgba(255,255,255,0) 100%
+  );
+  animation: shimmer 1.5s infinite;
+}
+
+.song-info {
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.song-title {
+  color: var(--white-2);
+  font-size: var(--fs-6);
+  font-weight: var(--fw-500);
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.song-artist {
+  color: var(--light-gray-70);
+  font-size: var(--fs-7);
+  font-weight: var(--fw-300);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Sound wave animation on hover */
+.song-item .sound-wave {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  width: 16px;
+  height: 16px;
+  margin-right: 5px;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity var(--transition-1), transform var(--transition-1);
+}
+
+.song-item:hover .sound-wave {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.sound-wave .bar {
+  width: 2px;
+  height: 20%;
+  background-color: var(--orange-yellow-crayola);
+  border-radius: 1px;
+  animation: bounce 0.8s ease-in-out infinite alternate;
+}
+
+.sound-wave .bar:nth-child(2) { animation-delay: 0.15s; }
+.sound-wave .bar:nth-child(3) { animation-delay: 0.3s; }
+.sound-wave .bar:nth-child(4) { animation-delay: 0.45s; }
+
+@keyframes bounce {
+  0% { height: 20%; }
+  100% { height: 100%; }
+}
+
+/* Skeleton Loading styles */
+.song-item.skeleton {
+  pointer-events: none;
+}
+
+.song-item.skeleton .skeleton-img {
+  width: 55px;
+  height: 55px;
+  border-radius: 8px;
+  background: var(--jet);
+  position: relative;
+  overflow: hidden;
+}
+
+.song-item.skeleton .skeleton-title,
+.song-item.skeleton .skeleton-artist {
+  background: var(--jet);
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+}
+
+.song-item.skeleton .skeleton-title {
+  width: 140px;
+  height: 16px;
+  margin-bottom: 8px;
+}
+
+.song-item.skeleton .skeleton-artist {
+  width: 90px;
+  height: 12px;
+}
+
+.song-item.skeleton :is(.skeleton-img, .skeleton-title, .skeleton-artist)::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.05) 20%,
+    rgba(255, 255, 255, 0.1) 60%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
+
+/**
+ * #games 
+ */
+
+.games-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+.game-item {
+  position: relative;
+  background: var(--border-gradient-onyx);
+  padding: 20px;
+  border-radius: 14px;
+  box-shadow: var(--shadow-2);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  transition: transform var(--transition-1), box-shadow var(--transition-1);
+}
+
+.game-item::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  background: var(--bg-gradient-jet);
+  border-radius: inherit;
+  z-index: -1;
+}
+
+.game-icon-box {
+  background: var(--onyx);
+  padding: 10px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.game-icon-box img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.game-info {
+  flex-grow: 1;
+}
+
+.game-title {
+  color: var(--white-2);
+  font-size: var(--fs-5);
+  font-weight: var(--fw-500);
+  margin-bottom: 4px;
+}
+
+.game-genre {
+  color: var(--light-gray-70);
+  font-size: var(--fs-7);
+  font-weight: var(--fw-300);
+}
+
+/* Custom themed hover glows for each game */
+.game-item:hover {
+  transform: translateY(-2px);
+}
+
+.game-item.valorant-card:hover {
+  box-shadow: 0 5px 15px rgba(255, 70, 85, 0.25);
+  border-color: rgba(255, 70, 85, 0.4);
+}
+
+.game-item.roblox-card:hover {
+  box-shadow: 0 5px 15px rgba(227, 227, 227, 0.2);
+  border-color: rgba(227, 227, 227, 0.3);
+}
+
+.game-item.minecraft-card:hover {
+  box-shadow: 0 5px 15px rgba(85, 170, 85, 0.25);
+  border-color: rgba(85, 170, 85, 0.4);
+}
+
+.game-item.osu-card:hover {
+  box-shadow: 0 5px 15px rgba(255, 102, 170, 0.25);
+  border-color: rgba(255, 102, 170, 0.4);
+}
+
+.game-item.adofai-card:hover {
+  box-shadow: 0 5px 15px rgba(47, 128, 237, 0.25);
+  border-color: rgba(47, 128, 237, 0.4);
+}
+
+.game-item.gd-card:hover {
+  box-shadow: 0 5px 15px rgba(80, 220, 100, 0.25);
+  border-color: rgba(80, 220, 100, 0.4);
+}
+
+/**
+ * #languages
+ */
+
+.languages-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+
+.language-item {
+  position: relative;
+  background: var(--border-gradient-onyx);
+  padding: 15px 10px;
+  border-radius: 12px;
+  box-shadow: var(--shadow-2);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 10px;
+  transition: transform var(--transition-1), box-shadow var(--transition-1);
+}
+
+.language-item::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  background: var(--bg-gradient-jet);
+  border-radius: inherit;
+  z-index: -1;
+}
+
+.language-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.lang-icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  transition: transform var(--transition-1);
+}
+
+.language-item:hover .lang-icon {
+  transform: scale(1.1) rotate(2deg);
+}
+
+.lang-name {
+  color: var(--white-2);
+  font-size: var(--fs-7);
+  font-weight: var(--fw-500);
+}
+
+/**
+ * #responsive breakpoints for More About Me
+ */
+
+@media (min-width: 575px) {
+  .songs-list {
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  
+  .games-list {
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .languages-list {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .songs-list {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .languages-list {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+
+/*-----------------------------------*\
   #ACCESSIBILITY & INTERACTIVE POLISH
 \*-----------------------------------*/
 
